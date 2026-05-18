@@ -1,0 +1,40 @@
+# ====== ModusToolbox generated / cached ======
+app/build/
+app/libs/
+app/mtb_shared/
+app/.mtbqueryapi
+app/.cyignore
+app/GeneratedSource/
+
+# Keep deps/ pinning files (they're tiny pointers to GitHub commits)
+# but ignore the cache they expand into.
+mtb_shared/
+
+# ====== Editor / IDE ======
+.vscode/settings.json
+.vscode/c_cpp_properties.json
+.idea/
+*.swp
+*.swo
+*~
+
+# ====== Build artifacts ======
+*.o
+*.a
+*.elf
+*.hex
+*.map
+*.bin
+*.lst
+*.d
+
+# ====== OS junk ======
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ====== Secrets ======
+*.pem
+*.key
+.env
+.env.local
