@@ -16,15 +16,9 @@
  * ============================================================================
  */
 
+#include "main.h"
+#include "drivers.h"
 #include "barometer_task.h"
-#include "dps368.h"
-#include "cyhal.h"
-#include "cybsp.h"
-#include "cy_retarget_io.h"
-
-#include "FreeRTOS.h"
-#include "task.h"
-#include "queue.h"
 
 #include <stdio.h>
 

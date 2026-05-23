@@ -19,9 +19,8 @@
  */
 
 #include "dps368.h"
+#include "cy_result.h"
 #include "cyhal.h"
-#include "FreeRTOS.h"
-#include "task.h"
 #include <string.h>
 
 #define I2C_TIMEOUT_MS          (10U)
@@ -121,7 +120,7 @@ static cy_rslt_t wait_for_status(dps368_t *dev, uint8_t mask, uint32_t retries)
         cy_rslt_t r = reg_read(dev, DPS368_REG_MEAS_CFG, &status, 1);
         if (r != CY_RSLT_SUCCESS) return r;
         if ((status & mask) == mask) return CY_RSLT_SUCCESS;
-        vTaskDelay(pdMS_TO_TICKS(1));
+        cyhal_system_delay_ms(1);
     }
     return CY_RSLT_TYPE_ERROR;
 }
@@ -142,7 +141,7 @@ cy_rslt_t dps368_init(dps368_t *dev, cyhal_i2c_t *i2c)
     /* --- Soft reset, let it settle ------------------------------------- */
     rslt = reg_write(dev, DPS368_REG_RESET, DPS368_SOFT_RESET_VALUE);
     if (rslt != CY_RSLT_SUCCESS) return rslt;
-    vTaskDelay(pdMS_TO_TICKS(40));     /* t_startup <= 40ms in datasheet */
+    cyhal_system_delay_ms(40);     /* t_startup <= 40ms in datasheet */
 
     /* --- WHO_AM_I check ------------------------------------------------- */
     rslt = reg_read(dev, DPS368_REG_PRODUCT_ID, buf, 1);

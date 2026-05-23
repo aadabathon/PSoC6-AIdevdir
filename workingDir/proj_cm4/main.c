@@ -1,67 +1,56 @@
-/******************************************************************************
-* File Name:   main.c
-*
-* Description: This is the source code for CM4 in the the Dual CPU Empty 
-*              Application for ModusToolbox.
-*
-* Related Document: See README.md
-*
-*
-*******************************************************************************
-* Copyright 2020-2024, Cypress Semiconductor Corporation (an Infineon company) or
-* an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
-*
-* This software, including source code, documentation and related
-* materials ("Software") is owned by Cypress Semiconductor Corporation
-* or one of its affiliates ("Cypress") and is protected by and subject to
-* worldwide patent protection (United States and foreign),
-* United States copyright laws and international treaty provisions.
-* Therefore, you may use this Software only as provided in the license
-* agreement accompanying the software package from which you
-* obtained this Software ("EULA").
-* If no EULA applies, Cypress hereby grants you a personal, non-exclusive,
-* non-transferable license to copy, modify, and compile the Software
-* source code solely for use in connection with Cypress's
-* integrated circuit products.  Any reproduction, modification, translation,
-* compilation, or representation of this Software except as specified
-* above is prohibited without the express written permission of Cypress.
-*
-* Disclaimer: THIS SOFTWARE IS PROVIDED AS-IS, WITH NO WARRANTY OF ANY KIND,
-* EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, NONINFRINGEMENT, IMPLIED
-* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. Cypress
-* reserves the right to make changes to the Software without notice. Cypress
-* does not assume any liability arising out of the application or use of the
-* Software or any product or circuit described in the Software. Cypress does
-* not authorize its products for use in any products where a malfunction or
-* failure of the Cypress product may reasonably be expected to result in
-* significant property damage, injury or death ("High Risk Product"). By
-* including Cypress's product in a High Risk Product, the manufacturer
-* of such system or application assumes all risk of such use and in doing
-* so agrees to indemnify Cypress against all liability.
-*******************************************************************************/
+/**
+ * @file main.c
+ * @brief DPS368 barometer demo entry point
+ * @author Adam Shebani (adamsheb414@gmail.com)
+ */
+#include "main.h"
+#include "drivers.h"
+#include "tasks.h"
 
-#include "cy_pdl.h"
-#include "cyhal.h"
-#include "cybsp.h"
 
+static void reset_btn_isr(void *arg, cyhal_gpio_event_t event)
+{
+    (void)arg; (void)event;
+    NVIC_SystemReset();   // doesn't return
+}
 
 int main(void)
 {
-    cy_rslt_t result;
+    cy_rslt_t rslt;
 
-    /* Initialize the device and board peripherals */
-    result = cybsp_init() ;
-    if (result != CY_RSLT_SUCCESS)
+    /* Board init: clocks, power, default pin muxing. Always first. */
+    rslt = cybsp_init();
+    if (rslt != CY_RSLT_SUCCESS) CY_ASSERT(0);
+
+    __enable_irq();
+
+    /* Hook printf() up to the KitProg3 virtual COM port at 115200 8N1. */
+    rslt = cy_retarget_io_init(CYBSP_DEBUG_UART_TX, CYBSP_DEBUG_UART_RX,
+                               CY_RETARGET_IO_BAUDRATE);
+    if (rslt != CY_RSLT_SUCCESS) CY_ASSERT(0);
+
+    printf("\x1b[2J\x1b[H");   /* ANSI clear-screen + home cursor */
+    printf("=== DPS368 barometer demo ===\r\n");
+
+    /* Bring up the I2C bus, sensor, queue, and the owner task. */
+    rslt = barometer_task_init();
+    if (rslt != CY_RSLT_SUCCESS)
     {
+        printf("barometer_task_init failed: 0x%08lx\r\n",
+               (unsigned long)rslt);
         CY_ASSERT(0);
     }
 
-    /* Enable global interrupts */
-    __enable_irq();
+    cyhal_gpio_init(CYBSP_USER_BTN, CYHAL_GPIO_DIR_INPUT,
+                  CYHAL_GPIO_DRIVE_PULLUP, 1);
+    cyhal_gpio_register_callback(CYBSP_USER_BTN,
+      &(cyhal_gpio_callback_data_t){ .callback = reset_btn_isr });
+    cyhal_gpio_enable_event(CYBSP_USER_BTN, CYHAL_GPIO_IRQ_FALL, 3, true);
 
-    for (;;)
-    {
-    }
+    /* Hand control to FreeRTOS. Never returns unless it can't start
+     * (usually means configTOTAL_HEAP_SIZE is too small). */
+    vTaskStartScheduler();
+
+    CY_ASSERT(0);
+    for(;;) {} //shouldn't ever hit
 }
-
-/* [] END OF FILE */

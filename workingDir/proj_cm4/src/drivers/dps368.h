@@ -19,9 +19,12 @@
  */
 
 #include <stdint.h>
+#include <stddef.h>
 #include <stdbool.h>
-#include "cyhal.h"
+
 #include "cy_result.h"
+#include "cyhal.h"
+#include "cyhal.h"
 
 /* ----------------------------------------------------------------------------
  * I2C address
