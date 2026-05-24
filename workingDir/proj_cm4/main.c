@@ -1,6 +1,6 @@
 /**
  * @file main.c
- * @brief DPS368 barometer demo entry point
+ * @brief demo entry point
  * @author Adam Shebani (adamsheb414@gmail.com)
  */
 #include "main.h"
@@ -13,6 +13,20 @@ static void reset_btn_isr(void *arg, cyhal_gpio_event_t event)
     (void)arg; (void)event;
     NVIC_SystemReset();   // doesn't return
 }
+
+// static void i2c_scan(void) 
+// {
+//     cyhal_i2c_t *i2c = i2c_bus_handle();
+//     uint8_t dummy;
+//     printf("I2C scan: ");
+//     for (uint8_t addr = 0x08; addr < 0x78; addr++)
+//     {
+//         cy_rslt_t r = cyhal_i2c_master_read(i2c, addr, &dummy, 0, 5, true);
+//         if (r == CY_RSLT_SUCCESS) printf("0x%02X ", addr);
+//     }
+//     printf("\r\n");
+// }
+
 
 int main(void)
 {
@@ -30,16 +44,18 @@ int main(void)
     if (rslt != CY_RSLT_SUCCESS) CY_ASSERT(0);
 
     printf("\x1b[2J\x1b[H");   /* ANSI clear-screen + home cursor */
-    printf("=== DPS368 barometer demo ===\r\n");
+    printf("=== Perhipheral demo ===\r\n");
 
-    /* Bring up the I2C bus, sensor, queue, and the owner task. */
+    rslt = i2c_bus_init();
+    if (rslt != CY_RSLT_SUCCESS) CY_ASSERT(0);
+
+    // i2c_scan();
+    
     rslt = barometer_task_init();
-    if (rslt != CY_RSLT_SUCCESS)
-    {
-        printf("barometer_task_init failed: 0x%08lx\r\n",
-               (unsigned long)rslt);
-        CY_ASSERT(0);
-    }
+    if (rslt != CY_RSLT_SUCCESS) { printf("baro init failed\r\n"); CY_ASSERT(0); }
+
+    rslt = imu_task_init();
+    if (rslt != CY_RSLT_SUCCESS) { printf("imu init failed\r\n"); CY_ASSERT(0); }
 
     cyhal_gpio_init(CYBSP_USER_BTN, CYHAL_GPIO_DIR_INPUT,
                   CYHAL_GPIO_DRIVE_PULLUP, 1);

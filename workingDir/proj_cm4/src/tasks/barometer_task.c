@@ -15,9 +15,9 @@
  *   3. Loop forever: read sensor, printf it, send to queue, sleep.
  * ============================================================================
  */
-
 #include "main.h"
-#include "drivers.h"
+#include "dps368.h"
+#include "i2c_bus.h"
 #include "barometer_task.h"
 
 #include <stdio.h>
@@ -32,16 +32,11 @@
 #define QUEUE_LENGTH            (4U)
 #define TASK_STACK_WORDS        (1024U)
 #define TASK_PRIORITY           (tskIDLE_PRIORITY + 2)
-
-/* I2C bus speed -- 400kHz is the DPS368 max and what the AI kit ships with. */
-#define I2C_FREQ_HZ             (400000U)
-
 /* ----------------------------------------------------------------------------
  * Module-private state. `static` = invisible outside this .c file. The queue
  * handle is exposed via barometer_task_get_queue() so other tasks can
  * subscribe without us making the variable public.
  * ---------------------------------------------------------------------------- */
-static cyhal_i2c_t      s_i2c;
 static dps368_t         s_sensor;
 static QueueHandle_t    s_reading_queue = NULL;
 static TaskHandle_t     s_task_handle   = NULL;
@@ -56,7 +51,7 @@ static void barometer_task(void *arg)
 
     /* Init the sensor. If this fails we have nothing useful to do, so park
      * the task forever in an error state rather than spinning on a dead bus. */
-    rslt = dps368_init(&s_sensor, &s_i2c);
+    rslt = dps368_init(&s_sensor, i2c_bus_handle());
     if (rslt != CY_RSLT_SUCCESS)
     {
         printf("[baro] dps368_init failed: 0x%08lx\r\n", (unsigned long)rslt);
@@ -107,35 +102,16 @@ static void barometer_task(void *arg)
 
 cy_rslt_t barometer_task_init(void)
 {
-    cy_rslt_t rslt;
+    /* The bus is now someone else's problem (i2c_bus_init in main). */
+    if (i2c_bus_handle() == NULL) return CY_RSLT_TYPE_ERROR;
 
-    /* --- I2C master init ----------------------------------------------
-     * Pins come from the BSP for the AI kit. If you ever move this driver
-     * to a custom board, swap CYBSP_I2C_SDA / CYBSP_I2C_SCL to your pins. */
-    cyhal_i2c_cfg_t i2c_cfg =
-    {
-        .is_slave        = false,
-        .address         = 0,
-        .frequencyhal_hz = I2C_FREQ_HZ,
-    };
-
-    rslt = cyhal_i2c_init(&s_i2c, CYBSP_I2C_SDA, CYBSP_I2C_SCL, NULL);
-    if (rslt != CY_RSLT_SUCCESS) return rslt;
-
-    rslt = cyhal_i2c_configure(&s_i2c, &i2c_cfg);
-    if (rslt != CY_RSLT_SUCCESS) return rslt;
-
-    /* --- Reading queue (other tasks subscribe via the getter below) ---- */
     s_reading_queue = xQueueCreate(QUEUE_LENGTH, sizeof(dps368_reading_t));
     if (s_reading_queue == NULL) return CY_RSLT_TYPE_ERROR;
 
-    /* --- Spawn the task ----------------------------------------------- */
     BaseType_t ok = xTaskCreate(barometer_task, "baro",
                                 TASK_STACK_WORDS, NULL,
                                 TASK_PRIORITY, &s_task_handle);
-    if (ok != pdPASS) return CY_RSLT_TYPE_ERROR;
-
-    return CY_RSLT_SUCCESS;
+    return (ok == pdPASS) ? CY_RSLT_SUCCESS : CY_RSLT_TYPE_ERROR;
 }
 
 QueueHandle_t barometer_task_get_queue(void)

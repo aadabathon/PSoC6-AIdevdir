@@ -13,5 +13,7 @@
  #define __DRIVERS_H__
 
 #include "dps368.h"
+#include "i2c_bus.h"
+#include "bmm350_glue.h"
 
  #endif

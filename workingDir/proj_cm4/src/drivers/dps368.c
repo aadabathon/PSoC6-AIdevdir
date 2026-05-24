@@ -19,6 +19,7 @@
  */
 
 #include "dps368.h"
+#include "i2c_bus.h"
 #include "cy_result.h"
 #include "cyhal.h"
 #include <string.h>
@@ -32,16 +33,22 @@
  * ---------------------------------------------------------------------------- */
 static cy_rslt_t reg_read(dps368_t *dev, uint8_t reg, uint8_t *buf, size_t n)
 {
-    return cyhal_i2c_master_mem_read(dev->i2c, DPS368_I2C_ADDR,
-                                     reg, 1, buf, (uint16_t)n,
-                                     I2C_TIMEOUT_MS);
+    if (!i2c_bus_lock(50)) return CY_RSLT_TYPE_ERROR;
+    cy_rslt_t r = cyhal_i2c_master_mem_read(dev->i2c, DPS368_I2C_ADDR,
+                                            reg, 1, buf, (uint16_t)n,
+                                            I2C_TIMEOUT_MS);
+    i2c_bus_unlock();
+    return r;
 }
 
 static cy_rslt_t reg_write(dps368_t *dev, uint8_t reg, uint8_t val)
 {
-    return cyhal_i2c_master_mem_write(dev->i2c, DPS368_I2C_ADDR,
-                                      reg, 1, &val, 1,
-                                      I2C_TIMEOUT_MS);
+    if (!i2c_bus_lock(50)) return CY_RSLT_TYPE_ERROR;
+    cy_rslt_t r = cyhal_i2c_master_mem_write(dev->i2c, DPS368_I2C_ADDR,
+                                             reg, 1, &val, 1,
+                                             I2C_TIMEOUT_MS);
+    i2c_bus_unlock();
+    return r;
 }
 
 /* ----------------------------------------------------------------------------

@@ -37,6 +37,8 @@ INCLUDES+=.
 INCLUDES+=src
 INCLUDES+=src/tasks
 INCLUDES+=src/drivers
+INCLUDES+=src/config
+INCLUDES+=src/vendor
 
 INCLUDES+=$(FREERTOS_ROOT)/Source/include
 INCLUDES+=$(FREERTOS_ROOT)/Source/portable/COMPONENT_CM4/TOOLCHAIN_GCC_ARM
