@@ -57,6 +57,9 @@ int main(void)
     rslt = imu_task_init();
     if (rslt != CY_RSLT_SUCCESS) { printf("imu init failed\r\n"); CY_ASSERT(0); }
 
+    rslt = mag_task_init();
+    if (rslt != CY_RSLT_SUCCESS) { printf("mag init failed\r\n"); CY_ASSERT(0); }
+
     cyhal_gpio_init(CYBSP_USER_BTN, CYHAL_GPIO_DIR_INPUT,
                   CYHAL_GPIO_DRIVE_PULLUP, 1);
     cyhal_gpio_register_callback(CYBSP_USER_BTN,
