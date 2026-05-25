@@ -265,3 +265,9 @@
 51	594	8012833435558289	C:/Users/adams/Learning/PSoC6-ai-board/workingDir/proj_cm4/build/Debug/local/source/BMI270_SensorAPI/bmi2.o	84d05a3c4b9aff35
 1528	2280	8012860511638154	C:/Users/adams/Learning/PSoC6-ai-board/workingDir/proj_cm4/build/Debug/local/source/bmm350_lib/bmm350.o	7ad391cc95f0cb28
 157	306	8013559632459950	C:/Users/adams/Learning/PSoC6-ai-board/workingDir/proj_cm4/build/Debug/local/src/vendor/bmm350_lib/bmm350_oor.o	fe66dde944c263c5
+1696	2721	8013771804591199	C:/Users/adams/Learning/PSoC6-ai-board/workingDir/proj_cm4/build/Debug/local/src/vendor/bmm350_lib/bmm350_oor.o	fe66dde944c263c5
+1691	2764	8013771804556078	C:/Users/adams/Learning/PSoC6-ai-board/workingDir/proj_cm4/build/Debug/local/src/vendor/bmm350_lib/bmm350.o	f0c92f05e2a787af
+1685	2901	8013771804486008	C:/Users/adams/Learning/PSoC6-ai-board/workingDir/proj_cm4/build/Debug/local/src/tasks/mag_task.o	f0fde637f7812a7b
+1681	2955	8013771804443452	C:/Users/adams/Learning/PSoC6-ai-board/workingDir/proj_cm4/build/Debug/local/src/drivers/bmm350_glue.o	765f7e52d12783ba
+1475	2964	8013771802391252	C:/Users/adams/Learning/PSoC6-ai-board/workingDir/proj_cm4/build/Debug/local/main.o	25fc36b9408a6fa3
+2964	5730	8013771817280152	build/APP_CY8CKIT-062S2-AI/Debug/proj_cm4.elf	3c7847875c07ceb2
